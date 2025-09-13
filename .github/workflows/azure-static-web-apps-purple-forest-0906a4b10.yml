@@ -3,11 +3,11 @@ name: Azure Static Web Apps CI/CD
 on:
   push:
     branches:
-      - master   # ✅ change to "main" if that's your branch
+      - main
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
-      - master   # ✅ same here
+      - main
 
 jobs:
   build_and_deploy_job:
@@ -33,13 +33,13 @@ jobs:
 
       # ✅ Restore & Build
       - name: Restore Dependencies
-        run: dotnet restore app
+        run: dotnet restore app/app.csproj
 
       - name: Build Blazor WebAssembly
-        run: dotnet build app --configuration Release --no-restore
+        run: dotnet build app/app.csproj --configuration Release --no-restore
 
       - name: Publish Blazor WebAssembly
-        run: dotnet publish app -c Release -o app/build
+        run: dotnet publish app/app.csproj -c Release -o app/build
 
       # ✅ Deploy prebuilt output to Azure Static Web Apps
       - name: Deploy to Azure Static Web Apps
@@ -49,9 +49,9 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_PURPLE_FOREST_0906A4B10 }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: "app/build/wwwroot" # already published
-          api_location: "Api"               # optional if you have Azure Functions
-          output_location: ""               # leave empty because we prebuilt
+          app_location: "app/build/wwwroot" # points to published wwwroot
+          api_location: "Api"               # if you have Functions
+          output_location: ""               # leave empty since we prebuilt
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
