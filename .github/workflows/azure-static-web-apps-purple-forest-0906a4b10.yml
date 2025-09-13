@@ -3,7 +3,7 @@ name: Azure Static Web Apps CI/CD
 on:
   push:
     branches:
-      - master
+      - master   # ✅ your repo uses master
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     steps:
+      # Checkout code
       - name: Checkout Repository
         uses: actions/checkout@v3
         with:
@@ -28,18 +29,19 @@ jobs:
           echo "$HOME/.dotnet" >> $GITHUB_PATH
           echo "DOTNET_ROOT=$HOME/.dotnet" >> $GITHUB_ENV
 
+      # Verify installed version
       - name: Verify .NET Version
         run: dotnet --version
 
-      # ✅ Restore & Build
+      # ✅ Restore, Build & Publish Blazor WASM
       - name: Restore Dependencies
-        run: dotnet restore app/InvoiceApp.csproj   # adjust with your actual csproj name
+        run: dotnet restore app/BlazorApp28/BlazorApp28.csproj
 
       - name: Build Blazor WebAssembly
-        run: dotnet build app/InvoiceApp.csproj --configuration Release --no-restore
+        run: dotnet build app/BlazorApp28/BlazorApp28.csproj --configuration Release --no-restore
 
       - name: Publish Blazor WebAssembly
-        run: dotnet publish app/InvoiceApp.csproj -c Release -o app/build
+        run: dotnet publish app/BlazorApp28/BlazorApp28.csproj -c Release -o app/build
 
       # ✅ Deploy prebuilt output to Azure Static Web Apps
       - name: Deploy to Azure Static Web Apps
@@ -49,10 +51,11 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_PURPLE_FOREST_0906A4B10 }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: "app/build/wwwroot"
-          api_location: "Api" # optional if you have Azure Functions
-          output_location: ""
+          app_location: "app/build/wwwroot" # Published WASM output
+          api_location: "Api"               # Optional: Azure Functions
+          output_location: ""               # Empty because we already published
 
+  # ✅ Handle PR closures
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
