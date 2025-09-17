@@ -1,7 +1,53 @@
 ﻿@page "/"
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Employee Validation Demo</PageTitle>
 
-<h1>Hello, world!</h1>
+<h3>Complex Modal Validation in Blazor 10</h3>
 
-Welcome to your new app.
+<EditForm Model="Model" OnValidSubmit="HandleValidSubmit">
+	<DataAnnotationsValidator />
+
+	<div class="mb-3">
+		<label class="form-label">First Name</label>
+		<InputText class="form-control" @bind-Value="Model.FirstName" />
+		<ValidationMessage For="@(() => Model.FirstName)" />
+	</div>
+
+	<div class="mb-3">
+		<label class="form-label">Last Name</label>
+		<InputText class="form-control" @bind-Value="Model.LastName" />
+		<ValidationMessage For="@(() => Model.LastName)" />
+	</div>
+
+	<h5>Address</h5>
+	<div class="mb-3">
+		<label class="form-label">Street</label>
+		<InputText class="form-control" @bind-Value="Model!.Address.Street" />
+		<ValidationMessage For="@(() => Model!.Address.Street)" />
+	</div>
+
+	<div class="mb-3">
+		<label class="form-label">City</label>
+		<InputText class="form-control" @bind-Value="Model!.Address.City" />
+		<ValidationMessage For="@(() => Model!.Address.City)" />
+	</div>
+
+	<button type="submit" class="btn btn-success">Submit</button>
+</EditForm>
+
+@code {
+	private Emp Model = new();
+	protected override void OnInitialized() => Model ??= new();
+	private void HandleValidSubmit()
+	{
+		//read the form values from Model
+		var firstName = Model.FirstName;
+		var lastName = Model.LastName;
+		var street = Model.Address.Street;
+		var city = Model.Address.City;
+		// Handle the valid form submission
+		var message = $"Employee: {firstName} {lastName}\nAddress: {street}, {city}";
+	}
+}
+
+
